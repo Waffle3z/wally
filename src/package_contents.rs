@@ -101,12 +101,9 @@ impl PackageContents {
         if includes.is_empty() && Path::new(".gitignore").exists() {
             let gitignore = File::open(Path::new(".gitignore"))?;
 
-            BufReader::new(gitignore)
-                .lines()
-                .flatten()
-                .for_each(|pattern| {
-                    excludes.push(pattern);
-                });
+            for pattern in BufReader::new(gitignore).lines().map_while(Result::ok) {
+                excludes.push(pattern);
+            }
         }
 
         EXCLUDED_GLOBS

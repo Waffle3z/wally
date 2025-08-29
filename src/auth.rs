@@ -70,13 +70,13 @@ impl AuthStore {
     }
 
     fn contents(path: &Path) -> anyhow::Result<String> {
-        match fs_err::read_to_string(&path) {
+        match fs_err::read_to_string(path) {
             Ok(contents) => Ok(contents),
             Err(err) => {
                 if err.kind() == io::ErrorKind::NotFound {
                     Ok(DEFAULT_AUTH_TOML.to_owned())
                 } else {
-                    return Err(err.into());
+                    Err(err.into())
                 }
             }
         }

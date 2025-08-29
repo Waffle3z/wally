@@ -48,7 +48,7 @@ impl Args {
 }
 
 /// Options that apply to all subcommands for the CLI.
-#[derive(Debug, StructOpt)]
+#[derive(Debug, StructOpt, Default)]
 pub struct GlobalOptions {
     /// Enable more verbose logging. Can be specified multiple times to increase
     /// verbosity further.
@@ -66,17 +66,6 @@ pub struct GlobalOptions {
     /// Specify if a specific auth token should be provided. Usable only by tests.
     #[structopt(skip)]
     pub check_token: Option<String>,
-}
-
-impl Default for GlobalOptions {
-    fn default() -> Self {
-        Self {
-            verbosity: 0,
-            test_registry: false,
-            use_temp_index: false,
-            check_token: None,
-        }
-    }
 }
 
 #[derive(Debug, StructOpt)]

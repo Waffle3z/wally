@@ -200,7 +200,7 @@ fn create_return_require_variable() -> (LastStmt, Option<TokenReference>) {
 }
 
 pub enum MutateLinkResult {
-    Changed(Ast),
+    Changed(Box<Ast>),
     Unchanged,
 }
 
@@ -225,7 +225,9 @@ pub fn mutate_link(
                 .collect(),
         )
         .with_last_stmt(Some(create_return_require_variable()));
-    Ok(MutateLinkResult::Changed(parsed_code.with_nodes(new_nodes)))
+    Ok(MutateLinkResult::Changed(Box::new(
+        parsed_code.with_nodes(new_nodes),
+    )))
 }
 
 #[cfg(test)]

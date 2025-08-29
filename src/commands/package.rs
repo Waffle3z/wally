@@ -32,7 +32,7 @@ impl PackageSubcommand {
             }
         } else {
             let contents = PackageContents::pack_from_path(&self.project_path)?;
-            fs_err::write(&self.output_path.unwrap(), contents.data())?;
+            fs_err::write(self.output_path.unwrap(), contents.data())?;
         }
 
         Ok(())

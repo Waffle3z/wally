@@ -5,9 +5,12 @@ use std::path::{Path, PathBuf};
 
 use crate::require_parser::*;
 
-
 // Filesystem-based resolver
-fn resolve_components_fs(link_path: &Path, packages_root: &Path, path_components: &[String]) -> Option<PathBuf> {
+fn resolve_components_fs(
+    link_path: &Path,
+    packages_root: &Path,
+    path_components: &[String],
+) -> Option<PathBuf> {
     if path_components.is_empty() {
         return None;
     }
@@ -104,7 +107,9 @@ fn mutate_thunk_fs(path: &Path, packages_root: &Path) -> Result<()> {
 
     // Skip already-mutated thunks
     let original_src = std::fs::read_to_string(path)?;
-    if original_src.contains("local REQUIRED_MODULE") || original_src.contains("return REQUIRED_MODULE") {
+    if original_src.contains("local REQUIRED_MODULE")
+        || original_src.contains("return REQUIRED_MODULE")
+    {
         info!("Link already mutated, leaving unchanged");
         return Ok(());
     }
@@ -150,10 +155,10 @@ fn mutate_thunk_fs(path: &Path, packages_root: &Path) -> Result<()> {
             if !trimmed.starts_with("export type ") {
                 continue;
             }
-    
+
             // Parse "export type Name<...> = ..."
             let rest = &trimmed["export type ".len()..];
-    
+
             // Extract type name and optional generics by locating the first '<' ... '>' pair.
             let (type_name, generics_opt) = if let Some(lt_rel) = rest.find('<') {
                 let name = rest[..lt_rel].trim();
@@ -170,20 +175,20 @@ fn mutate_thunk_fs(path: &Path, packages_root: &Path) -> Result<()> {
                 let name_end = rest.find('=').unwrap_or(rest.len());
                 (rest[..name_end].trim(), None)
             };
-    
+
             // Derive list of generic parameter identifiers without defaults.
             // Keep variadic packs by preserving the trailing "...".
             let mut rhs_generics: Vec<String> = Vec::new();
             if let Some(generics) = generics_opt {
                 for raw in generics.split(',') {
                     // Strip default, e.g., "S = T" -> "S" and preserve "..."
-                    let name_only = raw.splitn(2, '=').next().unwrap().trim();
+                    let name_only = raw.split('=').next().unwrap().trim();
                     if !name_only.is_empty() {
                         rhs_generics.push(name_only.to_string());
                     }
                 }
             }
-    
+
             // Rebuild generics for LHS (keep original) and RHS (names only)
             let lhs_suffix = if let Some(generics) = generics_opt {
                 format!("<{}>", generics)
@@ -195,7 +200,7 @@ fn mutate_thunk_fs(path: &Path, packages_root: &Path) -> Result<()> {
             } else {
                 format!("<{}>", rhs_generics.join(", "))
             };
-    
+
             reexports.push(format!(
                 "export type {}{} = REQUIRED_MODULE.{}{}",
                 type_name, lhs_suffix, type_name, rhs_suffix
