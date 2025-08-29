@@ -37,7 +37,7 @@ impl InstallationContext {
         project_path: &Path,
         shared_path: Option<String>,
         server_path: Option<String>,
-    ) -> Self {
+    ) -> anyhow::Result<Self> {
         let shared_dir = project_path.join("Packages");
         let server_dir = project_path.join("ServerPackages");
         let dev_dir = project_path.join("DevPackages");
@@ -46,7 +46,7 @@ impl InstallationContext {
         let server_index_dir = server_dir.join("_Index");
         let dev_index_dir = dev_dir.join("_Index");
 
-        Self {
+        Ok(Self {
             shared_dir,
             shared_index_dir,
             shared_path,
@@ -55,7 +55,7 @@ impl InstallationContext {
             server_path,
             dev_dir,
             dev_index_dir,
-        }
+        })
     }
 
     /// Delete the existing index, if it exists.
@@ -171,6 +171,16 @@ impl InstallationContext {
         }
 
         bar.finish_and_clear();
+
+        // Post-pass: filesystem-based traversal/mutation on installed links
+        for dir in [&self.shared_dir, &self.server_dir, &self.dev_dir] {
+            if dir.exists() {
+                if let Err(err) = crate::type_reexports::run_on_packages_fs(dir) {
+                    log::warn!("Type re-export pass failed for {}: {}", dir.display(), err);
+                }
+            }
+        }
+
         log::info!("Downloaded {} packages!", num_packages);
 
         Ok(())

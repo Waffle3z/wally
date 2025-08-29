@@ -12,5 +12,8 @@ pub mod package_req;
 pub mod package_source;
 pub mod resolution;
 pub mod test_package;
+pub mod require_parser;
+pub mod link_mutator;
+pub mod type_reexports;
 
 pub use commands::*;
