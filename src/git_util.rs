@@ -31,11 +31,13 @@ fn make_credentials_callback(
             if let Some(token) = &access_token {
                 if !token_tried {
                     token_tried = true;
-                    return Cred::userpass_plaintext(token, "");
+                    return Cred::userpass_plaintext(&token, "");
                 }
-            } else if !cred_helper_tried {
-                cred_helper_tried = true;
-                return Cred::credential_helper(config, url, username);
+            } else {
+                if !cred_helper_tried {
+                    cred_helper_tried = true;
+                    return Cred::credential_helper(config, url, username);
+                }
             }
         }
 
@@ -140,7 +142,7 @@ pub fn commit_and_push(
     let git_config = git2::Config::open_default()?;
 
     // libgit2 only accepts a relative path
-    let relative_path = modified_file.strip_prefix(index_path).with_context(|| {
+    let relative_path = modified_file.strip_prefix(&index_path).with_context(|| {
         format!(
             "Path {} was not relative to package path {}",
             modified_file.display(),
@@ -159,7 +161,7 @@ pub fn commit_and_push(
     let head = repository.head()?;
     let parent = repository.find_commit(head.target().unwrap())?;
     let sig = git2::Signature::now("PackageUser", "PackageUser@localhost")?;
-    repository.commit(Some("HEAD"), &sig, &sig, message, &tree, &[&parent])?;
+    repository.commit(Some("HEAD"), &sig, &sig, &message, &tree, &[&parent])?;
 
     // git push
     let mut ref_status = Ok(());
@@ -200,7 +202,7 @@ pub fn update_index(access_token: Option<String>, repository: &Repository) -> an
     repository
         .find_remote("origin")?
         .fetch(&["main"], Some(&mut fetch_options), None)
-        .with_context(|| "could not fetch Git repository".to_string())?;
+        .with_context(|| format!("could not fetch Git repository"))?;
 
     let mut options = git2::build::CheckoutBuilder::new();
     options.force();
@@ -213,7 +215,7 @@ pub fn update_index(access_token: Option<String>, repository: &Repository) -> an
             git2::ResetType::Hard,
             Some(&mut options),
         )
-        .with_context(|| "could not reset git repo to fetch_head".to_string())?;
+        .with_context(|| format!("could not reset git repo to fetch_head"))?;
 
     Ok(())
 }

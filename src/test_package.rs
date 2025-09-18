@@ -116,7 +116,8 @@ impl PackageBuilder {
         archive.finish().unwrap();
         drop(archive);
 
-        PackageContents::from_buffer(buffer)
+        let contents = PackageContents::from_buffer(buffer);
+        contents
     }
 
     pub fn package(self) -> (Manifest, PackageContents) {

@@ -106,7 +106,7 @@ impl SearchBackend {
 
             let mut doc = Document::default();
 
-            for manifest in &metadata.versions {
+            for manifest in &(*metadata).versions {
                 doc.add_text(versions, manifest.package.version.to_string());
 
                 if !manifest.package.version.is_prerelease() {

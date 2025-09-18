@@ -54,12 +54,6 @@ impl InMemoryRegistry {
     }
 }
 
-impl Default for InMemoryRegistry {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 /// Returned by `InMemoryRegistry::source` and can be passed to package
 /// resolution code in order to tell it to use this package registry.
 #[derive(Clone)]
@@ -126,9 +120,7 @@ struct PackageEntry {
     contents: PackageContents,
 }
 
-type RegistryMap = HashMap<String, HashMap<String, Vec<PackageEntry>>>;
-
 #[derive(Clone, Default)]
 struct Storage {
-    contents: Arc<RwLock<RegistryMap>>,
+    contents: Arc<RwLock<HashMap<String, HashMap<String, Vec<PackageEntry>>>>>,
 }

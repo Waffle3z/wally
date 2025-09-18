@@ -70,7 +70,7 @@ impl FromStr for PackageReq {
         // so let's check for that here.
         //
         // https://github.com/steveklabnik/semver-parser/issues/51
-        if version_req_source.is_empty() || version_req_source.chars().all(char::is_whitespace) {
+        if version_req_source.len() == 0 || version_req_source.chars().all(char::is_whitespace) {
             bail!(BAD_FORMAT_MSG);
         }
 

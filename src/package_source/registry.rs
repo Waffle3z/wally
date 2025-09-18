@@ -32,7 +32,7 @@ impl Registry {
         let index_url = Url::parse(spec)?;
         // Force Rustls to avoid Windows schannel/native-tls issues
         let client = Client::builder().use_rustls_tls().build()?;
-
+ 
         Ok(Self {
             index_url,
             auth_token: OnceCell::new(),
@@ -47,7 +47,7 @@ impl Registry {
                 Some(token) => Ok(Some(Arc::from(token.as_str()))),
                 None => Ok(None),
             })
-            .cloned()
+            .map(|token| token.clone())
     }
 
     fn index(&self) -> anyhow::Result<&Arc<PackageIndex>> {

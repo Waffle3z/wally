@@ -102,7 +102,7 @@ impl PackageIndex {
             repository.find_remote("origin")?.url().unwrap()
         );
         git_util::update_index(self.access_token.clone(), &repository)
-            .context("could not update package index")?;
+            .with_context(|| format!("could not update package index"))?;
 
         Ok(())
     }
@@ -230,7 +230,7 @@ impl PackageIndex {
         path.push("owners.json");
 
         {
-            let mut owners = self.get_scope_owners(scope)?;
+            let mut owners = self.get_scope_owners(&scope)?;
             let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
 
             owners.push(*owner_id);

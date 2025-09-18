@@ -43,7 +43,9 @@ impl Manifest {
     }
 
     pub fn from_slice(slice: &[u8]) -> anyhow::Result<Self> {
-        let manifest: Manifest = toml::from_slice(slice).context("failed to parse manifest")?;
+        let manifest: Manifest =
+            toml::from_slice(slice).with_context(|| format!("failed to parse manifest"))?;
+
         Ok(manifest)
     }
 
@@ -140,7 +142,7 @@ pub struct Package {
 
 // Metadata we require when this manifest will be used to generate package folders
 // This information can be present in any package but is only used in the root package
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct PlaceInfo {
     /// Where the shared packages folder is located in the Roblox Datamodel
@@ -154,6 +156,15 @@ pub struct PlaceInfo {
     /// Example: `game.ServerScriptStorage.Packages`
     #[serde(default)]
     pub server_packages: Option<String>,
+}
+
+impl Default for PlaceInfo {
+    fn default() -> Self {
+        Self {
+            shared_packages: None,
+            server_packages: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
